@@ -31,6 +31,7 @@ namespace WebApp
             });
 
             services.AddControllers();
+            //services.AddCors();
         }
 
         // Configure the HTTP request pipeline at runtime
