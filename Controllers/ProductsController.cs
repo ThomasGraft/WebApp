@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WebApp.Models;
 using Microsoft.Extensions.Logging;
+using System.Runtime;
 
 namespace WebApp.Controllers
 {
+    [ApiController]
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
@@ -25,20 +27,30 @@ namespace WebApp.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<Product> GetProduct(long id)
+        public async Task<IActionResult> GetProduct(long id)
         {
-            return await context.Products.FindAsync(id);
+            Product p = await context.Products.FindAsync(id);
+            if (p == null)
+            {
+                return NotFound();
+            }
+            return Ok(new
+            {
+                p.ProductId, p.Name, p.Price, p.CategoryId, p.SupplierId
+            });
         }
 
         [HttpPost]
-        public async Task SaveProduct([FromBody]ProductBindingTarget target)
+        public async Task<IActionResult> SaveProduct(ProductBindingTarget target)
         {
-            await context.Products.AddAsync(target.ToProduct());
+            Product p = target.ToProduct();
+            await context.Products.AddAsync(p);
             await context.SaveChangesAsync();
+            return Ok(p);
         }
 
         [HttpPut]
-        public async Task UpdateProduct([FromBody]Product product)
+        public async Task UpdateProduct(Product product)
         {
             context.Update(product);
             await context.SaveChangesAsync();
@@ -52,6 +64,12 @@ namespace WebApp.Controllers
                 ProductId = id
             });
             await context.SaveChangesAsync();
+        }
+
+        [HttpGet("redirect")]
+        public IActionResult Redirect()
+        {
+            return RedirectToAction(nameof(GetProduct), new { Id = 1 });
         }
     }
 }

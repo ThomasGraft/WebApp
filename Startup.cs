@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using WebApp.Models;
 
 namespace WebApp
@@ -30,8 +31,18 @@ namespace WebApp
                 options.EnableSensitiveDataLogging(true);
             });
 
-            services.AddControllers();
-            //services.AddCors();
+            services.AddControllers().AddNewtonsoftJson();
+
+            services.Configure<MvcNewtonsoftJsonOptions>(options =>
+            {
+                options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+            });
+
+            // Omit properties whose value is null when serializing objects
+            //services.Configure<JsonOptions>(opts =>
+            //{
+            //    opts.JsonSerializerOptions.IgnoreNullValues = true;
+            //});
         }
 
         // Configure the HTTP request pipeline at runtime
